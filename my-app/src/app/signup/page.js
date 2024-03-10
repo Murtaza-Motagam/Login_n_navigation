@@ -1,13 +1,9 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { SignupSchema } from '../YSchema/YupSchema';
 import { useRouter } from 'next/navigation';
-import useAuthMiddleware from '../middlewares/AuthMiddlewares';
-
-
-
 
 const initialValues = {
     name: "",
@@ -18,8 +14,6 @@ const initialValues = {
 }
 
 const Signup = () => {
-
-    useAuthMiddleware();
 
     const [formData, setFromData] = useState([]);
     let isActive = true;
@@ -40,6 +34,19 @@ const Signup = () => {
             router.push('/dashboard')
         },
     })
+
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('User-details'));
+        const isUserActive = JSON.parse(localStorage.getItem('isUserActive'));
+    
+        if (user && isUserActive === true) {
+          router.push('/dashboard');
+        }
+        else {
+          null;
+        }
+    }, [])
+    
 
 
     return (

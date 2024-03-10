@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 import { LoginSchema } from '../YSchema/YupSchema';
 import { useRouter } from 'next/navigation';
-import useAuthMiddleware from '../middlewares/AuthMiddlewares';
 
 const initialValues = {
   email: "",
@@ -14,7 +13,6 @@ const initialValues = {
 
 const Login = () => {
 
-  useAuthMiddleware();
 
   const router = useRouter();
 
@@ -25,7 +23,7 @@ const Login = () => {
     validationSchema: LoginSchema,
     onSubmit: (values, actions) => {
 
-      const storedUser = JSON.parse(localStorage.getItem('User-details')) || {};
+      const storedUser = JSON.parse(localStorage.getItem('User-details'));
 
       if (storedUser[0].email === values.email && storedUser[0].password === values.password) {
         localStorage.setItem('isUserActive', JSON.stringify(isActive))
@@ -38,9 +36,22 @@ const Login = () => {
     },
   });
 
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('User-details'));
+    const isUserActive = JSON.parse(localStorage.getItem('isUserActive'));
+
+    if (user && isUserActive === true) {
+      router.push('/dashboard');
+    }
+    else {
+      null;
+    }
+  }, [])
+
+
 
   return (
-    <div className="bg-gray-100 min-h-screen max-w-[1200px] mx-auto lg:p-20 xl:p-20 p-5">
+    <div className=" min-h-screen max-w-[1200px] mx-auto lg:p-20 xl:p-20 p-5">
       <form className="w-full lg:w-1/2 xl:w-1/2 md:w-full rounded-md shadow-md shadow-gray-400 mx-auto bg-white p-5" onSubmit={handleSubmit} method="POST">
         <h1 className="text-center lg:text-2xl xl:text-2xl md:text-lg text-sm text-gray-900 mb-10 font-semibold">Signup the form</h1>
         <div className="relative z-0 w-full mb-5 group">

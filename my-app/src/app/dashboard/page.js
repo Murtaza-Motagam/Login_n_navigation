@@ -4,22 +4,19 @@ import React, { useEffect, useState } from 'react'
 import { EditSchema } from '../YSchema/YupSchema';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/navigation';
-import useAuthMiddleware from '../middlewares/AuthMiddlewares';
 
 const Dashboard = () => {
-
-  useAuthMiddleware();
 
   const router = useRouter();
 
   const handleLogout = () => {
     const data = localStorage.getItem('User-details');
-    if(data && data.length > 0){
+    if (data && data.length > 0) {
       localStorage.setItem('isUserActive', isNotActive);
       router.push('/login');
     }
   }
-  
+
 
   const getPrefillData = () => {
     const data = localStorage.getItem('User-details');
@@ -35,34 +32,50 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   var isNotActive = false;
 
-  const fetchUser = () => {
-    const retrievedUser = localStorage.getItem('User-details');
-    if (retrievedUser) {
-      setData(JSON.parse(retrievedUser));
-    }
-  }
-
   const { values, handleChange, handleSubmit, touched, handleReset, errors } = useFormik({
     initialValues: prefillData,
     validationSchema: EditSchema,
     onSubmit: (values, actions) => {
-      if(values.new_password && values.confirm_new_password){
+      if (values.new_password && values.confirm_new_password) {
         values.password = values.confirm_new_password;
         delete values.new_password;
         delete values.confirm_new_password;
+
+        // Save data and make user login again
+        localStorage.setItem('User-details', JSON.stringify([...formData, values]));
+        localStorage.setItem('isUserActive', JSON.stringify(isNotActive));
+        actions.resetForm();
+        closeModal();
+        router.push('/login');
       }
+      
+      // no need for user to login again 
+      
       localStorage.setItem('User-details', JSON.stringify([...formData, values]));
       localStorage.setItem('isUserActive', JSON.stringify(isNotActive));
       actions.resetForm();
       closeModal();
-      router.push('/login');
+      
 
     },
   })
 
 
   useEffect(() => {
-    fetchUser()
+
+    const user = JSON.parse(localStorage.getItem('User-details'));
+    const isUserActive = JSON.parse(localStorage.getItem('isUserActive'));
+
+    if (user && user.length > 0) {
+      setData(user)
+    }
+
+    if (user && isUserActive === false) {
+      router.push('/login');
+    }
+    else {
+      null;
+    }
 
   }, [prefillData])
 
